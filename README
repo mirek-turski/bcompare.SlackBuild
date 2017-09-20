@@ -1,6 +1,8 @@
-Beyond Compare is arguable one of the best comparison tools available.
-It is multiplatform (Windows, Linux, Mac OS X).
+Beyond Compare is arguably one of the best comparison tools available.
+It is available for Windows, Linux and Mac OS X.
 The tool is not a free software, but well woth the price.
+
 See https://www.scootersoftware.com/features.php for more information.
-This SlackBuild provides conversion of the debian packages available
-for download to Slackware tgz format.
+
+This SlackBuild provides conversion of the debian packages of
+Beyond Compare to Slackware tgz format.
