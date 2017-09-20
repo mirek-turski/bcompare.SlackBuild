@@ -1,0 +1,58 @@
+#!/bin/sh
+
+PRGNAM=bcompare
+
+# Allow $ARCH to be preset before running the script.  This is useful in the
+# case where someone is running a 32-bit chroot environment under an x86_64
+# kernel:
+ARCH=${ARCH:-$(uname -m)}
+
+case "$ARCH" in
+  i?86) DEBARCH="i386" ; ARCH=i386 ;;
+  x86_64) DEBARCH="amd64" ; ARCH=x86_64 ;;
+  *) echo "Package for $(uname -m) architecture is not available." ; exit 1 ;;
+esac
+
+DEBPKG=$(/bin/ls ${PRGNAM}-*_${DEBARCH}.deb 2> /dev/null)
+
+if [ $? -ne 0 ] ; then
+  cat << EOF
+
+This is a script to repackage a Beyond Compare .deb package
+for Slackware.  Run this script in the same directory as one of these
+binary packages:
+
+  bcompare-<version>_amd64.deb  (for 64-bit x86_64)
+  bcompare-<version>_i386.deb   (for 32-bit x86)
+
+This will create a Slackware .tgz package.  Install it with installpkg
+or use upgradepkg to upgrade from a previous version.
+
+EOF
+  exit 1
+fi
+
+VERSION=$(echo ${DEBPKG} | sed -n "s/${PRGNAM}-\(.*\)_${DEBARCH}\.deb/\1/p")
+BUILD=${BUILD:-1}
+TAG=${TAG:-_SBo}
+
+DATAFILE=$(ar t ${DEBPKG} | grep "data\.tar\.")
+
+CWD=$(pwd)
+TMP=${TMP:-/tmp}
+PKG=$TMP/package-$PRGNAM
+OUTPUT=${OUTPUT:-/tmp}
+
+rm -rf $PKG
+mkdir -p $TMP $PKG $OUTPUT
+cd $PKG
+ar x ${CWD}/${DEBPKG} ${DATAFILE} || exit 1
+tar xf ${DATAFILE} || exit 1
+rm -rf ${DATAFILE}
+
+mkdir -p $PKG/install
+cat $CWD/slack-desc > $PKG/install/slack-desc
+cat $CWD/doinst.sh > $PKG/install/doinst.sh
+
+cd $PKG
+/sbin/makepkg -l y -c n $OUTPUT/$PRGNAM-$VERSION-$ARCH-$BUILD$TAG.tgz
